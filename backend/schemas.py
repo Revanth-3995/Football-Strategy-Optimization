@@ -1,54 +1,72 @@
 from pydantic import BaseModel
-from typing import Optional, List, Dict
+from typing import Optional, List
+from datetime import date
 
-class Competition(BaseModel):
+class CompetitionBase(BaseModel):
     competition_id: int
     competition_name: str
+    country_name: str
+
+class CompetitionCreate(CompetitionBase):
+    pass
+
+class Competition(CompetitionBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+class SeasonBase(BaseModel):
     season_id: int
     season_name: str
 
-class Match(BaseModel):
+class SeasonCreate(SeasonBase):
+    pass
+
+class Season(SeasonBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+class TeamBase(BaseModel):
+    team_id: int
+    team_name: str
+
+class TeamCreate(TeamBase):
+    pass
+
+class Team(TeamBase):
+    id: int
+    class Config:
+        from_attributes = True
+
+class MatchBase(BaseModel):
     match_id: int
-    home_team: str
-    away_team: str
-    home_score: Optional[int]
-    away_score: Optional[int]
-    match_date: Optional[str]
+    match_date: date
+    home_score: int
+    away_score: int
 
-class ModelMetrics(BaseModel):
-    accuracy: float
-    precision: float
-    recall: float
-    f1: float
-    n_samples: int
-    report_text: str
+class MatchCreate(MatchBase):
+    home_team_id: int
+    away_team_id: int
+    competition_id: int
+    season_id: int
 
-class FeatureImportance(BaseModel):
-    feature: str
-    importance: float
+class Match(MatchBase):
+    id: int
+    home_team: Team
+    away_team: Team
+    class Config:
+        from_attributes = True
 
-class TacticalInsight(BaseModel):
-    insight: str
-    finding: str
-    action: str
+class PlayerBase(BaseModel):
+    player_id: int
+    player_name: str
+    nickname: Optional[str] = None
 
-class TrainResponse(BaseModel):
-    match_id: int
-    metrics: ModelMetrics
-    feature_importance: List[FeatureImportance]
-    charts: Dict[str, str]   # chart_name -> URL path
-    insights: List[TacticalInsight]
+class PlayerCreate(PlayerBase):
+    pass
 
-class PredictRequest(BaseModel):
-    location_x: float
-    location_y: float
-    minute: int
-    match_period: int
-    counterpress: bool
-    under_pressure: bool
-    play_pattern: str = "Regular Play"
-
-class PredictResponse(BaseModel):
-    probability: float
-    prediction: int
-    interpretation: str   # Human-readable string e.g. "68% chance of winning ball"
+class Player(PlayerBase):
+    id: int
+    class Config:
+        from_attributes = True
