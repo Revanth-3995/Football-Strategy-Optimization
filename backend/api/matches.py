@@ -26,9 +26,17 @@ def read_matches(competition_id: Optional[int] = None, season_id: Optional[int] 
         try:
             # Self-healing match ingestion
             df = statsbomb_service.get_matches(competition_id, season_id)
+            
+            # Fetch dynamic competition and season details
+            comp_info = statsbomb_service.get_competition_info(competition_id, season_id)
+            
             db_comp = db.query(models.Competition).filter(models.Competition.competition_id == competition_id).first()
             if not db_comp:
-                db_comp = models.Competition(competition_id=competition_id, competition_name="UEFA Euro 2020", country_name="Europe")
+                db_comp = models.Competition(
+                    competition_id=competition_id, 
+                    competition_name=comp_info["competition_name"], 
+                    country_name=comp_info["country_name"]
+                )
                 db.add(db_comp)
                 db.commit()
                 db.refresh(db_comp)
@@ -36,7 +44,10 @@ def read_matches(competition_id: Optional[int] = None, season_id: Optional[int] 
             # Create a season if not exists
             db_season = db.query(models.Season).filter(models.Season.season_id == season_id).first()
             if not db_season:
-                db_season = models.Season(season_id=season_id, season_name="2020")
+                db_season = models.Season(
+                    season_id=season_id, 
+                    season_name=comp_info["season_name"]
+                )
                 db.add(db_season)
                 db.commit()
                 db.refresh(db_season)

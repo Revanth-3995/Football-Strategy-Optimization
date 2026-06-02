@@ -72,3 +72,30 @@ def get_events(match_id: int) -> pd.DataFrame:
         return events
     except Exception as e:
         raise DataLoadError(f"Failed to load events for match {match_id}: {e}")
+
+def get_competition_info(competition_id: int, season_id: int) -> dict:
+    """
+    Fetch competition name, season name, and country name dynamically from StatsBomb list.
+    """
+    try:
+        comps = get_competitions()
+        matched = comps[(comps['competition_id'] == competition_id) & (comps['season_id'] == season_id)]
+        if not matched.empty:
+            row = matched.iloc[0]
+            return {
+                "competition_name": str(row['competition_name']),
+                "country_name": str(row.get('country_name', 'Europe')),
+                "season_name": str(row['season_name'])
+            }
+    except Exception as e:
+        print(f"Warning: Failed to fetch competition info from StatsBomb: {e}")
+    
+    # Fallback mappings for standard competitions
+    comp_names = {16: "Champions League", 43: "FIFA World Cup", 2: "Premier League", 55: "UEFA Euro 2020"}
+    season_names = {43: "2020", 3: "2018", 106: "2022", 4: "2018/2019", 27: "2015/2016", 44: "2003/2004"}
+    return {
+        "competition_name": comp_names.get(competition_id, "Unknown Competition"),
+        "country_name": "International" if competition_id in (43, 55) else "Europe",
+        "season_name": season_names.get(season_id, "2020")
+    }
+

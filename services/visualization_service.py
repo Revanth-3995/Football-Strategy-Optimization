@@ -21,6 +21,35 @@ def _extract_coords(df, col='location'):
     y = df[col].apply(lambda loc: loc[1] if isinstance(loc, list) and len(loc) >= 2 else np.nan)
     return pd.DataFrame({'x': x, 'y': y}).dropna()
 
+def _format_player_name(fullname: str) -> str:
+    if not fullname or not isinstance(fullname, str):
+        return ""
+    # Standard cleanups for known superstar naming schemas
+    if "Messi" in fullname:
+        return "Messi"
+    if "Cristiano" in fullname or "Ronaldo" in fullname:
+        if "dos Santos" in fullname:
+            return "C. Ronaldo"
+        return "Ronaldo"
+    if "Neymar" in fullname:
+        return "Neymar"
+    if "De Bruyne" in fullname:
+        return "De Bruyne"
+    if "van Dijk" in fullname:
+        return "van Dijk"
+    if "Alexander-Arnold" in fullname:
+        return "Alexander-Arnold"
+    
+    parts = fullname.split()
+    if len(parts) == 0:
+        return ""
+    # If last part is junior/senior/suffix, use the second to last part
+    if parts[-1].lower() in ["junior", "júnior", "senior", "ii", "iii", "iv", "filho", "neto"]:
+        if len(parts) >= 2:
+            return parts[-2]
+    return parts[-1]
+
+
 # 1. Pressing Heatmap
 def generate_pressing_heatmap(events: pd.DataFrame, match_id: int, team: str) -> str:
     fig, ax = plt.subplots(figsize=(12, 8))
@@ -144,7 +173,7 @@ def generate_pass_network(events: pd.DataFrame, match_id: int, team: str) -> str
                       edgecolors='black', linewidth=1.5, alpha=0.9, zorder=2, ax=ax)
                       
         for player, row in avg_loc.iterrows():
-            pitch.annotate(player.split()[-1], xy=(row['x'], row['y']), c='black', va='center', 
+            pitch.annotate(_format_player_name(player), xy=(row['x'], row['y']), c='black', va='center', 
                            ha='center', size=8, weight='bold', zorder=3, ax=ax)
         ax.set_title(f'Pass Network — {team}', color='white', fontsize=16, pad=10)
     else:
@@ -378,7 +407,7 @@ def generate_team_shape_map(events: pd.DataFrame, match_id: int, team: str) -> s
                 
             pitch.scatter(avg_loc['x'], avg_loc['y'], color='#00FFCC', edgecolors='black', s=80, ax=ax)
             for _, row in avg_loc.iterrows():
-                pitch.annotate(row['player'].split()[-1], xy=(row['x'], row['y']), c='white', 
+                pitch.annotate(_format_player_name(row['player']), xy=(row['x'], row['y']), c='white', 
                                va='bottom', ha='center', size=9, weight='bold', ax=ax)
             ax.set_title(f'Tactical Team Shape & Convex Hull — {team}', color='white', fontsize=16, pad=10)
         else:
@@ -410,7 +439,7 @@ def generate_formation_overlay(events: pd.DataFrame, match_id: int, team: str) -
         # Assign formations (e.g. GK, DEF, MID, FWD based on X averages)
         pitch.scatter(avg_loc['x'], avg_loc['y'], color='#FFD700', edgecolors='black', s=100, zorder=2, ax=ax)
         for player, row in avg_loc.iterrows():
-            pitch.annotate(player.split()[-1], xy=(row['x'], row['y']), c='white', va='top', 
+            pitch.annotate(_format_player_name(player), xy=(row['x'], row['y']), c='white', va='top', 
                            ha='center', size=8, weight='bold', ax=ax)
             
         ax.set_title(f'Formation Overlay Visualizer — {team}', color='white', fontsize=16, pad=10)

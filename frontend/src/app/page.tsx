@@ -46,7 +46,7 @@ interface SimResult {
 
 export default function Dashboard() {
   // Navigation tabs
-  const [activeTab, setActiveTab] = useState<"visuals" | "ml" | "scout" | "sim" | "recruit">("visuals");
+  const [activeTab, setActiveTab] = useState<"visuals" | "ml" | "scout" | "sim" | "recruit" | "verdict">("visuals");
 
   // Selection states
   const [competitions, setCompetitions] = useState<Competition[]>([]);
@@ -106,8 +106,8 @@ export default function Dashboard() {
   // Tab 5: Recruitment Similarity Engine
   const [recruitForm, setRecruitForm] = useState({
     position: "Midfielder",
-    age: 26,
-    budget: 80000000,
+    age: 35,
+    budget: 200000000,
     att: 0.7,
     pas: 0.8,
     dfn: 0.5,
@@ -125,10 +125,11 @@ export default function Dashboard() {
 
   const getSeasonId = (compId: number) => {
     const mappings: Record<number, number> = {
-      55: 43, // Euro 2020
-      11: 90, // La Liga
-      16: 4,  // Champions League
-      43: 3   // Bundesliga
+      55: 43,   // UEFA Euro 2020
+      11: 90,   // La Liga
+      16: 4,    // Champions League 2018/2019
+      43: 106,  // FIFA World Cup 2022
+      2: 27     // Premier League (EPL) 2015/2016
     };
     return mappings[compId] || 43;
   };
@@ -308,13 +309,14 @@ export default function Dashboard() {
       <aside className="w-64 border-r border-[#141b2d] bg-[#0c101b] p-6 flex flex-col justify-between">
         <div>
           <div className="flex items-center gap-3 mb-8">
-            <div className="w-8 h-8 rounded bg-gradient-to-tr from-cyan-500 to-emerald-500 flex items-center justify-center font-black text-black">A</div>
-            <h1 className="font-extrabold text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400">ANTIGRAVITY</h1>
+            <div className="w-8 h-8 rounded bg-gradient-to-tr from-cyan-500 to-emerald-500 flex items-center justify-center font-black text-black">T</div>
+            <h1 className="font-extrabold text-lg tracking-wider text-transparent bg-clip-text bg-gradient-to-r from-white via-slate-200 to-slate-400">TACTICIAN</h1>
           </div>
           
           <nav className="flex flex-col gap-2">
             {[
               { id: "visuals", label: "Tactical Visualizer" },
+              { id: "verdict", label: "Match Verdict" },
               { id: "ml", label: "ML Platforms" },
               { id: "scout", label: "Scouting Intelligence" },
               { id: "sim", label: "Tactical Sandbox" },
@@ -344,7 +346,12 @@ export default function Dashboard() {
       {/* Main Core Dashboard Layout */}
       <main className="flex-1 flex flex-col overflow-hidden">
         {/* Dynamic Global Header bar */}
-        <header className="h-20 border-b border-[#141b2d] bg-[#080d16] px-8 flex items-center justify-between gap-6 shrink-0 z-10">
+        <header className="h-20 border-b border-[#141b2d] bg-[#080d16] px-8 flex items-center justify-between gap-6 shrink-0 z-10 animate-fade-in">
+          <div className="flex flex-col select-none">
+            <h2 className="text-xs font-black tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-emerald-400">FOOTBALL STRATEGY OPTIMIZATION</h2>
+            <p className="text-[9px] text-slate-400 tracking-widest uppercase mt-0.5">Spatial Event Data Analytics & Machine Learning</p>
+          </div>
+          
           <div className="flex items-center gap-4">
             <select
               value={selectedComp}
@@ -473,6 +480,136 @@ export default function Dashboard() {
               </div>
             </div>
           )}
+
+          {activeTab === "verdict" && (() => {
+            const activeMatch = matches.find((m) => m.match_id === selectedMatch);
+            if (!activeMatch) {
+              return (
+                <div className="bg-[#090e18] border border-[#161f30] rounded-xl p-8 text-center max-w-md mx-auto">
+                  <div className="text-4xl mb-4">⚽</div>
+                  <h3 className="font-bold text-slate-200">No Match Selected</h3>
+                  <p className="text-xs text-slate-500 mt-2">Please select a competition and a match from the header dropdowns.</p>
+                </div>
+              );
+            }
+
+            const homeTeam = activeMatch.home_team?.team_name || "Home Team";
+            const awayTeam = activeMatch.away_team?.team_name || "Away Team";
+            const homeScore = activeMatch.home_score ?? 0;
+            const awayScore = activeMatch.away_score ?? 0;
+            const date = activeMatch.match_date || "Unknown Date";
+
+            let winnerText = "";
+            let winnerDetails = "";
+            let badgeColor = "";
+            let badgeIcon = "";
+
+            if (homeScore > awayScore) {
+              winnerText = `${homeTeam} Won!`;
+              winnerDetails = `${homeTeam} dominated the scoring sheet with ${homeScore} goals against ${awayTeam}'s ${awayScore}.`;
+              badgeColor = "from-amber-500/20 to-yellow-600/20 border-amber-500/50 text-amber-200";
+              badgeIcon = "🏆";
+            } else if (awayScore > homeScore) {
+              winnerText = `${awayTeam} Won!`;
+              winnerDetails = `${awayTeam} secured victory on the road with ${awayScore} goals against ${homeTeam}'s ${homeScore}.`;
+              badgeColor = "from-amber-500/20 to-yellow-600/20 border-amber-500/50 text-amber-200";
+              badgeIcon = "🏆";
+            } else {
+              winnerText = "Match Ended in a Draw!";
+              winnerDetails = "Both squads balanced each other out tactically, ending in a hard-fought draw.";
+              badgeColor = "from-slate-500/20 to-slate-700/20 border-slate-500/50 text-slate-200";
+              badgeIcon = "🤝";
+            }
+
+            return (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 animate-fade-in">
+                {/* Scoreboard panel */}
+                <div className="lg:col-span-2 bg-gradient-to-b from-[#0f172a] to-[#090e18] border border-[#161f30] rounded-2xl p-8 flex flex-col justify-between min-h-[400px] shadow-2xl relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl pointer-events-none"></div>
+                  <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-500/5 rounded-full blur-3xl pointer-events-none"></div>
+                  
+                  <div>
+                    <div className="flex justify-between items-center text-xs text-slate-400 border-b border-[#1e293b]/55 pb-4 mb-8">
+                      <span>📍 MATCH VERDICT ENGINE</span>
+                      <span>📅 {date}</span>
+                    </div>
+
+                    <div className="flex justify-around items-center py-6">
+                      {/* Home Team */}
+                      <div className="flex flex-col items-center gap-3 text-center w-1/3">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-cyan-600 to-cyan-900 border border-cyan-400/30 flex items-center justify-center font-black text-xl text-cyan-200 shadow-md">
+                          {homeTeam.substring(0, 2).toUpperCase()}
+                        </div>
+                        <h4 className="font-extrabold text-sm tracking-wide text-white line-clamp-2">{homeTeam}</h4>
+                        <span className="text-[10px] text-cyan-400 uppercase tracking-widest font-bold">Home</span>
+                      </div>
+
+                      {/* Digital Score */}
+                      <div className="flex items-center gap-4 text-center">
+                        <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 font-mono tracking-tighter">{homeScore}</span>
+                        <span className="text-xl font-bold text-slate-500">:</span>
+                        <span className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-white to-slate-400 font-mono tracking-tighter">{awayScore}</span>
+                      </div>
+
+                      {/* Away Team */}
+                      <div className="flex flex-col items-center gap-3 text-center w-1/3">
+                        <div className="w-16 h-16 rounded-full bg-gradient-to-tr from-emerald-600 to-emerald-900 border border-emerald-400/30 flex items-center justify-center font-black text-xl text-emerald-200 shadow-md">
+                          {awayTeam.substring(0, 2).toUpperCase()}
+                        </div>
+                        <h4 className="font-extrabold text-sm tracking-wide text-white line-clamp-2">{awayTeam}</h4>
+                        <span className="text-[10px] text-emerald-400 uppercase tracking-widest font-bold">Away</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Winner Display Badge */}
+                  <div className={`mt-8 bg-gradient-to-r ${badgeColor} border rounded-xl p-5 flex items-center gap-4 shadow-lg`}>
+                    <span className="text-3xl">{badgeIcon}</span>
+                    <div>
+                      <h5 className="text-[10px] uppercase tracking-widest font-black text-white/70">Official Outcome</h5>
+                      <h4 className="text-base font-black text-white mt-0.5">{winnerText}</h4>
+                      <p className="text-xs text-white/80 mt-1 leading-relaxed">{winnerDetails}</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Tactical Verdict Metrics */}
+                <div className="bg-[#090e18] border border-[#161f30] rounded-2xl p-8 flex flex-col justify-between shadow-xl">
+                  <div>
+                    <h3 className="font-extrabold text-sm text-cyan-400 tracking-wide uppercase mb-2">Tactical Insights</h3>
+                    <p className="text-xs text-slate-400 mb-6">Automated analytics derived from the spatial events of this match.</p>
+
+                    <div className="flex flex-col gap-4">
+                      <div className="p-4 bg-[#0d1421] border border-[#1e293b]/70 rounded-lg">
+                        <span className="text-[10px] text-slate-500 uppercase font-bold">Total Match Goals</span>
+                        <p className="text-2xl font-black text-white mt-1">{homeScore + awayScore}</p>
+                      </div>
+
+                      <div className="p-4 bg-[#0d1421] border border-[#1e293b]/70 rounded-lg">
+                        <span className="text-[10px] text-slate-500 uppercase font-bold">Goal Differential</span>
+                        <p className={`text-2xl font-black mt-1 ${Math.abs(homeScore - awayScore) > 0 ? "text-cyan-400" : "text-slate-400"}`}>
+                          {Math.abs(homeScore - awayScore)}
+                        </p>
+                      </div>
+
+                      <div className="p-4 bg-cyan-950/20 border border-cyan-500/20 rounded-lg">
+                        <h4 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2">Platform Recommendation</h4>
+                        <p className="text-xs text-slate-300 leading-relaxed">
+                          {homeScore === awayScore 
+                            ? "Review progressive passes map and expected threat grid to see how build-up play failed to break down the block."
+                            : `Analyze ${homeScore > awayScore ? homeTeam : awayTeam}'s pressing heatmaps to understand their defensive control and counterpress triggers that led to this victory.`}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="text-xs text-slate-500 border-t border-[#141b2d] pt-4 mt-6">
+                    <p>*Match results synchronized on demand from StatsBomb server.</p>
+                  </div>
+                </div>
+              </div>
+            );
+          })()}
 
           {activeTab === "ml" && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -891,6 +1028,58 @@ export default function Dashboard() {
                         type="range" min="0" max="1" step="0.1"
                         value={recruitForm.prs}
                         onChange={(e) => setRecruitForm({ ...recruitForm, prs: Number(e.target.value) })}
+                        className="w-full h-1.5 bg-[#111827] rounded outline-none accent-cyan-400"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-400">Dribbling Weight</span>
+                        <span className="text-cyan-400">{recruitForm.drb.toFixed(1)}</span>
+                      </div>
+                      <input
+                        type="range" min="0" max="1" step="0.1"
+                        value={recruitForm.drb}
+                        onChange={(e) => setRecruitForm({ ...recruitForm, drb: Number(e.target.value) })}
+                        className="w-full h-1.5 bg-[#111827] rounded outline-none accent-cyan-400"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-400">Physical Weight</span>
+                        <span className="text-cyan-400">{recruitForm.phy.toFixed(1)}</span>
+                      </div>
+                      <input
+                        type="range" min="0" max="1" step="0.1"
+                        value={recruitForm.phy}
+                        onChange={(e) => setRecruitForm({ ...recruitForm, phy: Number(e.target.value) })}
+                        className="w-full h-1.5 bg-[#111827] rounded outline-none accent-cyan-400"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-400">Max Age</span>
+                        <span className="text-cyan-400">{recruitForm.age} years</span>
+                      </div>
+                      <input
+                        type="range" min="18" max="40" step="1"
+                        value={recruitForm.age}
+                        onChange={(e) => setRecruitForm({ ...recruitForm, age: Number(e.target.value) })}
+                        className="w-full h-1.5 bg-[#111827] rounded outline-none accent-cyan-400"
+                      />
+                    </div>
+
+                    <div>
+                      <div className="flex justify-between text-xs mb-1">
+                        <span className="text-slate-400">Max Budget</span>
+                        <span className="text-cyan-400">€{(recruitForm.budget / 1000000).toFixed(0)}M</span>
+                      </div>
+                      <input
+                        type="range" min="10" max="200" step="10"
+                        value={recruitForm.budget / 1000000}
+                        onChange={(e) => setRecruitForm({ ...recruitForm, budget: Number(e.target.value) * 1000000 })}
                         className="w-full h-1.5 bg-[#111827] rounded outline-none accent-cyan-400"
                       />
                     </div>

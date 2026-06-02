@@ -17,4 +17,4 @@
 * **Counter Strategy / Exploitation:** Instruct central midfielders to make late progressive runs into the box or take long-range shots from the edge of the box.
 
 
-*Scouting Report compiled by Antigravity Tactical scouting suite.*
+*Scouting Report compiled by Football Strategy Optimization Platform.*
