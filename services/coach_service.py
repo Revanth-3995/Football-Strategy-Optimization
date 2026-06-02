@@ -252,7 +252,7 @@ class FootballCoachAI:
 
 ---
 
-*Report generated automatically by Antigravity Tactical Analytics Suite.*
+*Report generated automatically by Football Strategy Optimization Platform.*
 """
         filepath = os.path.join(REPORTS_DIR, f"{match_id}_coaching_report.md")
         with open(filepath, "w", encoding="utf-8") as f:

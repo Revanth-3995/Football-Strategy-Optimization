@@ -115,7 +115,7 @@ class OpponentScoutingPlatform:
 * **Counter Strategy / Exploitation:** {wk['counter_strategy']}
 \n"""
             
-        md += "\n*Scouting Report compiled by Antigravity Tactical scouting suite.*"
+        md += "\n*Scouting Report compiled by Football Strategy Optimization Platform.*"
         
         # Save to markdown file
         filepath = os.path.join(SCOUTING_DIR, f"{team.replace(' ', '_')}_scouting_report.md")
