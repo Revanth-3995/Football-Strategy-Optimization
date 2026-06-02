@@ -32,14 +32,14 @@ def process_match_analytics(match_id: int, team_name: str) -> Dict[str, Any]:
 
     total_passes = len(passes)
     completed_passes = len(passes[passes['pass_outcome'].isna()]) if 'pass_outcome' in passes.columns else 0
-    pass_completion_rate = (completed_passes / total_passes) * 100 if total_passes > 0 else 0
+    pass_completion_rate = int(round((completed_passes / total_passes) * 100)) if total_passes > 0 else 0
 
     total_shots = len(shots)
     total_goals = len(shots[shots['shot_outcome'] == 'Goal']) if 'shot_outcome' in shots.columns else 0
 
-    press_success_rate = 0.0
+    press_success_rate = 0
     if not team_pressures.empty:
-        press_success_rate = team_pressures['press_success'].mean() * 100
+        press_success_rate = int(round(team_pressures['press_success'].mean() * 100))
 
     # Assemble analytics payload
     analytics_payload = {
@@ -55,3 +55,4 @@ def process_match_analytics(match_id: int, team_name: str) -> Dict[str, Any]:
     }
 
     return analytics_payload
+

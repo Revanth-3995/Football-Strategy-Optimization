@@ -62,3 +62,46 @@ def test_get_feature_matrix():
     X, y = get_feature_matrix(data)
     assert 'pitch_zone_attacking' in X.columns
     assert y.iloc[0] == 1
+
+def test_calculate_advanced_metrics():
+    from services.analytics_engine import calculate_advanced_metrics
+    events = pd.DataFrame({
+        'team': ['Team A', 'Team B', 'Team A', 'Team B'],
+        'type': ['Pass', 'Pass', 'Shot', 'Ball Recovery'],
+        'location': [[85.0, 40.0], [30.0, 20.0], [110.0, 39.0], [50.0, 50.0]],
+        'shot_statsbomb_xg': [0.15, None, None, None],
+        'pass_outcome': [None, 'Incomplete', None, None],
+        'under_pressure': [True, None, None, None],
+        'minute': [10, 10, 11, 11],
+        'second': [5, 10, 12, 14]
+    })
+    res = calculate_advanced_metrics(events, 100)
+    assert 'Team A' in res['metrics']
+    assert 'Team B' in res['metrics']
+    assert res['metrics']['Team A']['progressive_passes'] >= 0
+
+def test_detect_formation():
+    from services.ml_service import MLPlatform
+    ml = MLPlatform()
+    events = pd.DataFrame({
+        'team': ['Team A', 'Team A', 'Team A', 'Team A'],
+        'type': ['Pass', 'Pass', 'Pass', 'Pass'],
+        'player': ['P1', 'P2', 'P3', 'P4'],
+        'location': [[20.0, 40.0], [45.0, 30.0], [60.0, 50.0], [90.0, 40.0]],
+    })
+    res = ml.detect_formation(events, 'Team A')
+    assert 'formation' in res
+    assert 'confidence' in res
+
+def test_detect_player_role():
+    from services.ml_service import MLPlatform
+    ml = MLPlatform()
+    events = pd.DataFrame({
+        'team': ['Team A', 'Team A'],
+        'type': ['Tackle', 'Clearance'],
+        'player': ['P1', 'P1'],
+        'location': [[30.0, 20.0], [25.0, 40.0]],
+    })
+    role = ml.detect_player_role(events, 'P1')
+    assert isinstance(role, str)
+
