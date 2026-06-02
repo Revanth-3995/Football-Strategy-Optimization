@@ -1,4 +1,4 @@
-# Football Strategy Optimization using Spatial Event Data Analytics & Machine Learning (Phases 1-13)
+# Football Strategy Optimization using Spatial Event Data Analytics & Machine Learning 
 
 Welcome to the **Football Strategy Optimization Platform** — a premium, publication-grade analytics and strategy optimization suite designed for professional managers, scouts, and performance analysts. 
 
