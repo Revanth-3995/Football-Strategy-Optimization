@@ -419,16 +419,20 @@ export default function Dashboard() {
                 <h3 className="font-extrabold text-sm text-cyan-400 mb-3 tracking-wide">VISUALIZATION ENGINE</h3>
                 {[
                   { key: "pressing_heatmap", label: "Pressing Heatmap" },
-                  { key: "defensive_heatmap", label: "Defensive Actions" },
-                  { key: "recovery_heatmap", label: "Ball Recoveries" },
+                  { key: "defensive_heatmap", label: "Defensive Actions Heatmap" },
+                  { key: "recovery_heatmap", label: "Ball Recovery Heatmap" },
+                  { key: "ball_recovery_map", label: "Ball Recovery Scatter Map" },
                   { key: "shot_map", label: "Expected Goals Shot Map" },
                   { key: "pass_network", label: "Pass Network" },
-                  { key: "progressive_passes", label: "Progressive Passes" },
-                  { key: "expected_threat", label: "Expected Threat (xT)" },
+                  { key: "progressive_passes", label: "Progressive Passes Map" },
+                  { key: "expected_threat", label: "Expected Threat (xT) Grid" },
                   { key: "team_shape", label: "Team Shape Convex Hull" },
                   { key: "formation_overlay", label: "Formation Overlay" },
                   { key: "defensive_block", label: "Defensive Block Compactness" },
-                  { key: "tactical_occupancy", label: "Tactical Zone Occupancy" }
+                  { key: "tactical_occupancy", label: "Tactical Zone Occupancy" },
+                  { key: "zone_control", label: "Zone Control Grid Map" },
+                  { key: "possession_flow", label: "Possession Flow Timeline" },
+                  { key: "player_touchmap", label: "Player Touch Map" }
                 ].map((vis) => (
                   <button
                     key={vis.key}
