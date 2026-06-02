@@ -1,6 +1,6 @@
 import pandas as pd
 from sklearn.ensemble import RandomForestClassifier
-from model import train_model, evaluate_model, get_feature_importance
+from backend.model import train_model, evaluate_model, get_feature_importance
 
 def test_train_model():
     X_train = pd.DataFrame({'f1': [1, 0, 1, 0], 'f2': [0, 1, 0, 1]})

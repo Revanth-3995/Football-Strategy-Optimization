@@ -7,12 +7,12 @@ from typing import List
 from sklearn.model_selection import train_test_split
 from pydantic import BaseModel
 
-import database
-import data_loader
-import feature_engineering
-import model as ml_model
-import visualizations
-from schemas import (
+import backend.database as database
+import backend.data_loader as data_loader
+import backend.feature_engineering as feature_engineering
+import backend.model as ml_model
+import backend.visualizations as visualizations
+from backend.schemas import (
     Competition, Match, PredictRequest, PredictResponse,
     TrainResponse, ModelMetrics, TacticalInsight
 )
@@ -177,24 +177,11 @@ def train_pipeline(req: TrainRequest):
         # 6. Importances
         importances = ml_model.get_feature_importance(model, X_train.columns.tolist())
 
-        # 7. Generate Charts
+        # Base charts for legacy frontend support only
         charts = {}
         charts['pressing_heatmap'] = visualizations.generate_pressing_heatmap(model_df, req.match_id, req.team)
-        charts['defensive_heatmap'] = visualizations.generate_defensive_heatmap(events, req.match_id, req.team)
-        charts['pass_network'] = visualizations.generate_pass_network(events, req.match_id, req.team)
-        charts['shot_map'] = visualizations.generate_shot_map(events, req.match_id, req.team)
-
-        # Top touch player
-        touches = events[events['team'] == req.team]
-        if not touches.empty and 'player' in touches.columns:
-            top_player = touches['player'].value_counts().idxmax()
-            charts['player_touchmap'] = visualizations.generate_player_touchmap(events, req.match_id, top_player)
-        else:
-            charts['player_touchmap'] = ""
-
         charts['feature_importance'] = visualizations.generate_feature_importance_chart(importances, req.match_id)
 
-        # Update chart paths for frontend
         for k, v in charts.items():
             if v:
                 charts[k] = f"/{v.replace('outputs/charts/', 'charts/')}"
@@ -230,6 +217,44 @@ def predict(req: PredictRequest):
         }
     except FileNotFoundError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/api/visualizations/advanced/{match_id}/{team}")
+def get_advanced_visualizations(match_id: int, team: str):
+    try:
+        events = data_loader.get_events(match_id)
+        charts = {}
+
+        # Original Phase 3
+        charts['defensive_heatmap'] = visualizations.generate_defensive_heatmap(events, match_id, team)
+        charts['pass_network'] = visualizations.generate_pass_network(events, match_id, team)
+        charts['shot_map'] = visualizations.generate_shot_map(events, match_id, team)
+
+        touches = events[events['team'] == team]
+        if not touches.empty and 'player' in touches.columns:
+            top_player = touches['player'].value_counts().idxmax()
+            charts['player_touchmap'] = visualizations.generate_player_touchmap(events, match_id, top_player)
+        else:
+            charts['player_touchmap'] = ""
+
+        charts['recovery_heatmap'] = visualizations.generate_recovery_heatmap(events, match_id, team)
+        charts['zone_control_map'] = visualizations.generate_zone_control_map(events, match_id, team)
+
+        # New Phase 3 features
+        charts['progressive_pass_map'] = visualizations.generate_progressive_pass_map(events, match_id, team)
+        charts['tactical_occupancy_map'] = visualizations.generate_tactical_occupancy_map(events, match_id, team)
+        charts['expected_threat_map'] = visualizations.generate_expected_threat_map(events, match_id, team)
+        charts['possession_flow_map'] = visualizations.generate_possession_flow_map(events, match_id, team)
+        charts['team_shape_map'] = visualizations.generate_team_shape_map(events, match_id, team)
+        charts['formation_overlay_map'] = visualizations.generate_formation_overlay_map(events, match_id, team)
+        charts['defensive_block_map'] = visualizations.generate_defensive_block_map(events, match_id, team)
+
+        for k, v in charts.items():
+            if v:
+                charts[k] = f"/{v.replace('outputs/charts/', 'charts/')}"
+
+        return charts
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

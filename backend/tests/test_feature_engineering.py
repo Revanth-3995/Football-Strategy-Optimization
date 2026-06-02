@@ -1,6 +1,6 @@
 import pandas as pd
 import numpy as np
-from feature_engineering import extract_features, get_feature_matrix
+from backend.feature_engineering import extract_features, get_feature_matrix
 
 def test_extract_features():
     # Mock some basic events to satisfy the conditions

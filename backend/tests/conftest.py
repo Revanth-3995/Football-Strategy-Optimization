@@ -1,6 +1,6 @@
 import pytest
 import os
-import database
+import backend.database as database
 
 @pytest.fixture(autouse=True)
 def setup_db():
